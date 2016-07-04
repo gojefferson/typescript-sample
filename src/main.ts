@@ -2,42 +2,84 @@ import { sayHello } from "./greet";
 
 let mainBox: HTMLElement = document.getElementById("main-box");
 
-function makeRectange(parent: HTMLElement) {
-  let maxWidth: number = parent.offsetWidth;
-  let maxHeight: number = parent.offsetHeight;
 
-  let left: number = Math.random() * maxWidth;
-  let top: number = Math.random() * maxHeight;
-  let width: number = 20 + Math.random() * (maxWidth - left - 20) ;
-  let height: number = 20 + Math.random() * (maxHeight - top - 20);
+class Rectangle {
+  width: number;
+  height: number;
+  element: HTMLElement;
+  constructor(public left: number,
+              public right: number,
+              public top: number,
+              public bottom: number) {
+    this.width = right - left;
+    this.height = bottom - top;
+    let rectangle = document.createElement("div");
+    rectangle.classList.add("rectangle");
 
-  let rectangle = document.createElement("div");
-  rectangle.classList.add("rectangle");
+    rectangle.style.left = `${this.left}px`;
+    rectangle.style.top = `${this.top}px`;
+    rectangle.style.width = `${this.width}px`;
+    rectangle.style.height = `${this.height}px`;
 
-  rectangle.style.left = `${left}px`;
-  rectangle.style.top = `${top}px`;
-  rectangle.style.width = `${width}px`;
-  rectangle.style.height = `${height}px`;
+    rectangle.style.backgroundColor = `hsl(${Math.random() * 360},100%, 60%)`;
+    this.element = rectangle;
+  }
 
-  rectangle.style.backgroundColor = `hsl(${Math.random() * 360},100%, 75%)`;
-
-  parent.appendChild(rectangle); 
-  return rectangle;
+  overlaps(r2: Rectangle) {
+    if (r2.right < this.left) return false;
+    if (r2.left > this.right) return false;
+    if (r2.bottom < this.top) return false;
+    if (r2.top > this.bottom) return false;
+    return true;
+  }
 }
 
-function doRectanglesOverlap(r1: HTMLElement, r2: HTMLElement) {
-  let r1Right = r1.offsetLeft + r1.offsetWidth;
-  let r2Right = r2.offsetLeft + r2.offsetWidth;
-  let r1Bottom = r1.offsetTop + r1.offsetHeight;
-  let r2Bottom = r2.offsetTop + r2.offsetHeight;
+class BoardController {
+  board: HTMLElement;
+  items: Rectangle[];
+  width: number;
+  height: number;
 
-  if (r2Right < r1.offsetLeft) return false;
-  if (r2.offsetLeft > r1Right) return false;
-  if (r2Bottom < r1.offsetTop) return false;
-  if (r2.offsetTop > r1Bottom) return false;
-  return true;
+  constructor(board: HTMLElement) {
+    this.board = board;
+    this.width = board.offsetWidth;
+    this.height = board.offsetHeight;
+    this.items = [];
+  }
+
+  newRandomRectange() {
+    let left: number = Math.random() * this.width;
+    let top: number = Math.random() * this.height;
+    let width: number = 20 + Math.random() * (this.width - left - 20) ;
+    let height: number = 20 + Math.random() * (this.height - top - 20);
+
+    return new Rectangle(left, left+width, top, top+height);
+  }
+
+  checkNoOverlap(newRectangle: Rectangle) {
+    for (let i = 0; i < this.items.length; i++) {
+      if(newRectangle.overlaps(this.items[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  placeRectangle(rectangle: Rectangle) {
+    this.items.push(rectangle);
+    this.board.appendChild(rectangle.element);
+  }
+
+  placeNRectangles(n: number) {
+    for (let i = 0; i < n; i++) {
+      let r = this.newRandomRectange();
+      if (this.checkNoOverlap(r)) {
+        this.placeRectangle(r);
+      }
+    }
+  }
 }
 
-for (let i = 0; i < 300; i++) {
-  makeRectange(mainBox);
-}
+let boardApp = new BoardController(mainBox);
+
+boardApp.placeNRectangles(3000);

@@ -5,15 +5,19 @@
   <title>Hello World!</title>
   <style>
     #main-box {
-      width: 800px;
+      width: 90%;
       height: 700px;
       margin: auto;
       position: relative;
-      border: 1px solid #666;
     }
     .rectangle {
       position: absolute;
-      opacity: 0.5;
+      opacity: .5;
+      transition-duration: 55s;      
+    }
+    .rectangle:hover {
+      opacity: 1;
+      transition-duration: 0s;
     }
   </style>
 </head>
